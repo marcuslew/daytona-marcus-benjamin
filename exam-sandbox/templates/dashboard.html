@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-shell">
+  <header class="dashboard-header">
+    <h1>Teacher Dashboard</h1>
+    <p>Live exam monitoring — each student sandboxed via Daytona</p>
+  </header>
+
+  <table class="dashboard-table">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>ID</th>
+        <th>Sandbox</th>
+        <th>Status</th>
+        <th>Flags</th>
+        <th>Risk</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="dashboard-body"></tbody>
+  </table>
+</div>
+
+<div id="report-overlay" class="overlay hidden">
+  <div class="overlay-card wide">
+    <button id="close-report" class="close-btn" type="button">×</button>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="exam-shell">
+  <header class="exam-header">
+    <div>
+      <h1>Exam in Progress</h1>
+      <p>Student: <strong>{{ student_name }}</strong></p>
+    </div>
+    <div class="status-box">
+      <span id="sandbox-status" class="badge pending">Sandbox: initializing…</span>
+      <span id="timer" class="timer">20:00</span>
+    </div>
+  </header>
+
+  <div id="warning-banner" class="warning-banner hidden"></div>
+
+  <form id="exam-form">
+    {% for q in questions %}
+    <div class="question" data-qid="{{ q.id }}">
+      <p class="q-text">{{ loop.index }}. {{ q.text }}</p>
+      {% if q.type == 'mcq' %}
+        {% for choice in q.choices %}
+        <label class="choice">
+          <input type="radio" name="q{{ q.id }}" value="{{ choice }}">
+          {{ choice }}
+        </label>
+        {% endfor %}
+      {% else %}
+        <textarea name="q{{ q.id }}" rows="4" placeholder="Type your answer..."></textarea>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </form>
+
+  <button id="submit-btn" class="submit-btn" type="button">Submit Exam</button>
+</div>
+
+<div id="submitted-overlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h2>Exam Submitted</h2>
+    <p id="submitted-msg"></p>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+{% endblock %}
