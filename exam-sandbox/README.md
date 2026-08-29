@@ -115,13 +115,3 @@ Caveats to know about, honestly:
   universities running remote assessments.
 - **Sponsor usage:** real Daytona SDK calls create, execute inside, and delete a genuine
   sandbox per student — not a mock.
-
-## Known limitations (be upfront with judges)
-
-- Copy/paste/tab-switch detection is enforced in the browser via JS event listeners, not
-  by Daytona container isolation itself — the sandbox isolates the *server-side scoring
-  agent*, not the student's browser. Framed honestly in the demo as: browser signals in,
-  isolated agent scoring out.
-- No teacher authentication — anyone with the URL can view `/dashboard`. Fine for a demo,
-  would need auth for production.
-- Devtools-open detection is a rough heuristic (window size delta), not foolproof.
