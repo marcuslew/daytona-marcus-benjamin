@@ -304,6 +304,10 @@ def api_dashboard_session(session_id):
     )
 
 
+# Runs on import so the schema exists whether launched via `python app.py`
+# (local dev) or a production WSGI server like gunicorn (which imports this
+# module and never executes the __main__ block below).
+init_db()
+
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
