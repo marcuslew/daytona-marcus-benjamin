@@ -11,6 +11,14 @@ client-side, then at submit time they're shipped **into the student's own sandbo
 an AI risk-scoring agent runs in isolation and returns a suspicion score before the sandbox
 is torn down. A live teacher dashboard shows every student's status and flags in real time.
 
+## Live demo
+
+- Student flow: https://daytona-marcus-benjamin.onrender.com/
+- Teacher dashboard: https://daytona-marcus-benjamin.onrender.com/dashboard
+
+(Hosted on Render's free tier — the service spins down after ~15 minutes of no traffic, so
+the first request after a while may take 30-50s to wake it back up.)
+
 ## Why Daytona, specifically
 
 Instead of just bolting on face recognition, each student's post-exam behavioral analysis
@@ -66,44 +74,6 @@ python app.py
 5. Submit the exam → sandbox is torn down, dashboard shows a computed risk verdict
    (clear / suspicious / high_risk). Click **View** for the full per-student report:
    answers + timestamped activity log.
-
-## Deploying to Render (a public, persistent link)
-
-This app is a stateful Flask + SQLite server, not a static site or a set of serverless
-functions — it needs to run as a normal long-lived process with real disk. That rules out
-Vercel-style serverless hosting (each request can hit a fresh, stateless instance with no
-shared disk, which would silently break the SQLite-backed session/flag/dashboard data).
-[Render](https://render.com)'s free Web Service tier runs Flask the way it's meant to run.
-
-The repo already has what Render needs:
-- `requirements.txt` includes `gunicorn` (a production WSGI server; note it's Linux-only,
-  so it won't run if you try it locally on Windows — that's expected, `python app.py` is
-  still the right way to run this locally)
-- `Procfile`: `web: gunicorn app:app --bind 0.0.0.0:$PORT`
-- `app.py` initializes the database on import, so it works under gunicorn (not just when
-  run directly with `python app.py`)
-
-Steps (do these yourself in Render's dashboard — this session won't create accounts or
-enter your API key into forms on your behalf):
-
-1. Sign up at [render.com](https://render.com) and connect your GitHub account.
-2. **New +** → **Web Service** → pick `marcuslew/daytona-marcus-benjamin`.
-3. **Root Directory:** `exam-sandbox`
-4. **Build Command:** `pip install -r requirements.txt`
-5. **Start Command:** `gunicorn app:app --bind 0.0.0.0:$PORT` (Render also auto-detects
-   this from the `Procfile`, so you can usually leave it default)
-6. **Environment** tab → add:
-   - `DAYTONA_API_KEY` = your key (from app.daytona.io → Keys)
-   - `FLASK_SECRET_KEY` = any random string
-7. Deploy. Render gives you a permanent `https://<your-service>.onrender.com` URL.
-
-Caveats to know about, honestly:
-- The free tier spins the service down after ~15 minutes of no traffic and takes ~30-50s
-  to wake back up on the next request — fine for demoing, just expect a cold-start delay
-  if it's been idle.
-- The free tier's filesystem isn't a *persistent disk* — a redeploy or a long idle-then-wake
-  cycle can reset `exam.db`. For a hackathon demo window this is low-risk, but don't expect
-  data to survive indefinitely; it's not a substitute for a real database in production.
 
 ## Judging criteria mapping
 
