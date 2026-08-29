@@ -136,6 +136,47 @@
     if (widthDiff > 160 || heightDiff > 160) sendFlag('devtools');
   }, 4000);
 
+  // Run Code buttons (coding question -- executes inside the network-blocked sandbox)
+  document.querySelectorAll('.run-code-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (submitted) return;
+      const qid = btn.dataset.qid;
+      const textarea = form.querySelector(`textarea[name="q${qid}"]`);
+      const output = document.getElementById(`output-${qid}`);
+      const code = textarea.value;
+
+      saveAnswer(qid, code);
+
+      btn.disabled = true;
+      btn.textContent = 'Running…';
+      output.textContent = '';
+      output.classList.remove('error');
+
+      fetch('/api/exam/run_code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_id: Number(qid), code }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          output.textContent = data.output || '(no output)';
+          if (data.network_blocked) {
+            // Already logged server-side (api/exam/run_code) -- just show it here.
+            output.classList.add('error');
+            showWarning('⚠ Network access blocked inside sandbox');
+          }
+        })
+        .catch(() => {
+          output.textContent = 'Error running code.';
+          output.classList.add('error');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = 'Run Code';
+        });
+    });
+  });
+
   submitBtn.addEventListener('click', submitExam);
 
   startSandbox();

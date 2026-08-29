@@ -25,6 +25,13 @@
           {{ choice }}
         </label>
         {% endfor %}
+      {% elif q.type == 'code' %}
+        <textarea class="code-editor" name="q{{ q.id }}" rows="10" spellcheck="false">{{ q.starter_code }}</textarea>
+        <div class="code-actions">
+          <button type="button" class="run-code-btn" data-qid="{{ q.id }}">Run Code</button>
+          <span class="code-hint">Runs inside your isolated, network-blocked sandbox.</span>
+        </div>
+        <pre class="code-output" id="output-{{ q.id }}"></pre>
       {% else %}
         <textarea name="q{{ q.id }}" rows="4" placeholder="Type your answer..."></textarea>
       {% endif %}

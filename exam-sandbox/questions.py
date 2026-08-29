@@ -47,4 +47,21 @@ QUESTIONS = [
         "text": "In 2-3 sentences, explain why running untrusted code inside an isolated "
         "sandbox is safer than running it directly on a shared server.",
     },
+    {
+        "id": 7,
+        "type": "code",
+        "text": "Write a Python function reverse_string(s) that returns s reversed. Your code "
+        "runs inside your own Daytona sandbox with ALL outbound network access blocked "
+        "-- it cannot call an AI API, search the web, or fetch anything external.",
+        "starter_code": (
+            "def reverse_string(s):\n"
+            "    # your code here\n"
+            "    pass\n\n"
+            'print(reverse_string("hello"))\n\n'
+            "# Try uncommenting these two lines and hitting Run --\n"
+            "# the sandbox will block the request, proving isolation is real:\n"
+            "# import urllib.request\n"
+            "# urllib.request.urlopen('https://api.openai.com', timeout=5)\n"
+        ),
+    },
 ]

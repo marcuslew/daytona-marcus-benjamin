@@ -37,12 +37,14 @@
         const { session, answers, flags, questions } = data;
         const answerMap = Object.fromEntries(answers.map((a) => [String(a.question_id), a.answer]));
         const qHtml = questions
-          .map(
-            (q) =>
-              `<div class="report-q"><strong>${escapeHtml(q.text)}</strong><p>${
-                escapeHtml(answerMap[String(q.id)] || '') || '<em>no answer</em>'
-              }</p></div>`
-          )
+          .map((q) => {
+            const answer = escapeHtml(answerMap[String(q.id)] || '');
+            const body =
+              q.type === 'code'
+                ? `<pre class="code-output">${answer || '<em>no code submitted</em>'}</pre>`
+                : `<p>${answer || '<em>no answer</em>'}</p>`;
+            return `<div class="report-q"><strong>${escapeHtml(q.text)}</strong>${body}</div>`;
+          })
           .join('');
         const flagHtml = flags.length
           ? flags.map((f) => `<li>[${f.ts}] ${escapeHtml(f.type)} ${escapeHtml(f.detail || '')}</li>`).join('')

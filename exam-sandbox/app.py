@@ -91,7 +91,8 @@ def local_risk_fallback(flags):
     cp = sum(1 for f in flags if f["type"] in ("copy", "paste", "cut"))
     idle = sum(1 for f in flags if f["type"] == "idle")
     devtools = sum(1 for f in flags if f["type"] == "devtools")
-    score = min(tab * 15 + cp * 25 + idle * 5 + devtools * 30, 100)
+    network = sum(1 for f in flags if f["type"] == "network_block_triggered")
+    score = min(tab * 15 + cp * 25 + idle * 5 + devtools * 30 + network * 40, 100)
     verdict = "high_risk" if score >= 60 else ("suspicious" if score >= 25 else "clear")
     return score, verdict
 
@@ -169,6 +170,38 @@ def api_exam_answer():
     )
     db.commit()
     return jsonify({"ok": True})
+
+
+@app.route("/api/exam/run_code", methods=["POST"])
+def api_exam_run_code():
+    session_id = session.get("exam_session_id")
+    if not session_id:
+        return jsonify({"error": "no active session"}), 401
+
+    data = request.get_json(force=True)
+    code = data.get("code", "")
+
+    db = get_db()
+    row = db.execute(
+        "SELECT sandbox_id, sandbox_status FROM exam_sessions WHERE id = ?", (session_id,)
+    ).fetchone()
+
+    if not row or not row["sandbox_id"] or row["sandbox_status"] != "active":
+        return jsonify({"ok": False, "output": "Sandbox not available.", "network_blocked": False})
+
+    try:
+        output, network_blocked = dsb.run_student_code(row["sandbox_id"], code)
+    except Exception as exc:
+        output, network_blocked = f"Execution error: {exc}", False
+
+    if network_blocked:
+        db.execute(
+            "INSERT INTO flags (session_id, flag_type, detail, ts) VALUES (?, ?, ?, ?)",
+            (session_id, "network_block_triggered", "Submitted code attempted outbound network access", now_iso()),
+        )
+        db.commit()
+
+    return jsonify({"ok": True, "output": output, "network_blocked": network_blocked})
 
 
 @app.route("/api/flag", methods=["POST"])
